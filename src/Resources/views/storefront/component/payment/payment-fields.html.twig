@@ -1,0 +1,81 @@
+{% sw_extends '@Storefront/storefront/component/payment/payment-fields.html.twig' %}
+
+{% set collapseTriggerLabels = {
+    collapseTriggerMoreLabel: "checkout.collapseTriggerMore"|trans|sw_sanitize,
+    collapseTriggerLessLabel: "checkout.collapseTriggerLess"|trans|sw_sanitize
+} %}
+
+{% block component_payment_methods %}
+
+    <div class="payment-methods">
+        {% block component_payment_method %}
+
+            {% set subscription = 0 %}
+            {% for lineItem in page.cart.lineItems %}
+                {% if lineItem.extensions.subscription and lineItem.extensions.subscription.interval %}
+                    {% set subscription = 1 %}
+                {% endif %}
+            {% endfor %}
+
+            {% for payment in page.paymentMethods[:visiblePaymentMethodsLimit] %}
+                {#
+                    payment.shortName == 'invoice_payment' or 
+                    payment.shortName == 'pre_payment' or
+                #}
+
+                {% if 
+                    payment.shortName == 'stripe.shopware_payment.payment_handler.card' or
+                    not subscription 
+                %}
+                    {% include '@LandimITSubscription/storefront/component/payment/payment-method.html.twig' %}
+                {% endif %}
+
+            {% endfor %}
+
+            {% block component_payment_method_collapse %}
+                {% if page.paymentMethods | length > visiblePaymentMethodsLimit and visiblePaymentMethodsLimit is not same as(null) %}
+                    <div class="collapse{% if subscription %}-removed{% endif %}">
+                        {% for payment in page.paymentMethods[visiblePaymentMethodsLimit:] %}
+
+                            {#
+                                payment.shortName == 'invoice_payment' or 
+                                payment.shortName == 'pre_payment' or
+                            #}
+
+                            {% if 
+                                payment.shortName == 'stripe.shopware_payment.payment_handler.card' or
+                                not subscription 
+                            %}
+                                {% include '@LandimITSubscription/storefront/component/payment/payment-method.html.twig' %}
+                            {% endif %}
+
+                        {% endfor %}
+                    </div>
+
+                    {% block component_payment_method_collapse_trigger %}
+                        {% if not subscription %}
+
+                        <div class="btn btn-link confirm-checkout-collapse-trigger"
+                             data-collapse-checkout-confirm-methods="true"
+                             data-collapse-checkout-confirm-methods-options='{{ collapseTriggerLabels|json_encode }}'>
+                            <span class="confirm-checkout-collapse-trigger-label">
+                                {% block component_payment_method_collapse_trigger_label %}
+                                    {{ collapseTriggerLabels.collapseTriggerMoreLabel }}
+                                {% endblock %}
+                            </span>
+                            {% block component_payment_method_collapse_trigger_icon %}
+                                {% sw_icon 'arrow-down' style {
+                                    'class': 'confirm-checkout-chevron',
+                                    'size': 'xs',
+                                    'pack' : 'solid'
+                                } %}
+                            {% endblock %}
+                        </div>
+                        
+                        {% endif %}
+                    {% endblock %}
+                {% endif %}
+            {% endblock %}
+        {% endblock %}
+    </div>
+{% endblock %}

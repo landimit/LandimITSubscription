@@ -1,0 +1,18 @@
+{% sw_extends '@PremsOnePageCheckoutApp/storefront/component/opc/add-promotion.html.twig' %}
+
+{% block component_opc_promotion_form %}
+ 	{% set subscription = false %}
+
+    {% for lineItem in page.cart.lineItems %}
+
+        {% if lineItem.extensions.subscription.interval %}
+            {% set subscription = true %}
+        {% endif %}
+
+    {% endfor %}
+
+    {% if not subscription %}
+        {{ parent() }}
+    {% endif %}
+
+{% endblock %}

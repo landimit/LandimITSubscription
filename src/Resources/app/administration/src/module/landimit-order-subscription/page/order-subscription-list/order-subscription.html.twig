@@ -1,0 +1,534 @@
+{% block landimit_subscription_list %}
+<sw-page class="landimit-subscription-list">
+    {% block landimit_subscription_list_search_bar %}
+    <template #search-bar>
+        <sw-search-bar
+            initial-search-type="order"
+            :initial-search="term"
+            @search="onSearch"
+        />
+    </template>
+    {% endblock %}
+
+    {% block landimit_subscription_list_smart_bar_header %}
+    <template #smart-bar-header>
+        {% block landimit_subscription_list_smart_bar_header_title %}
+        <h2>
+            {% block landimit_subscription_list_smart_bar_header_title_text %}
+            {{ $tc('landimit.textSubscriptions') }}
+            {% endblock %}
+
+            {% block landimit_subscription_list_smart_bar_header_amount %}
+            <span
+                v-if="!isLoading"
+                class="sw-page__smart-bar-amount"
+            >
+                ({{ total }})
+            </span>
+            {% endblock %}
+        </h2>
+        {% endblock %}
+    </template>
+    {% endblock %}
+
+   
+
+    {% block landimit_subscription_list_content %}
+    <template #content>
+
+        {% block landimit_subscription_list_content_slot %}
+        <div class="landimit-subscription-list__content">
+
+            {% block landimit_subscription_list_grid %}
+            <sw-data-grid
+                v-if="entitySearchable"
+                ref="orderGrid"
+                :data-source="orders"
+                :columns="orderColumns"
+                :full-page="true"
+                :show-settings="true"
+                :show-selection="true"
+                :sort-by="sortBy"
+                :sort-direction="sortDirection"
+                :is-loading="isLoading"
+                :allow-column-edit="true"
+                identifier="landimit-subscription-list"
+                :disable-data-fetching="true"
+                :maximum-select-items="1000"
+                @column-sort="onSortColumn"
+                @page-change="onPageChange"
+                @selection-change="updateSelection"
+            >
+
+                {% block landimit_subscription_list_grid_columns %}
+                {% block landimit_subscription_list_grid_columns_order_number %}
+                <template #column-orderNumber="{ item }">
+                    {% block landimit_subscription_list_grid_order_number_link %}
+                    <router-link :to="{ name: 'landimit.subscription.detail', params: { id: item.id } }">
+                        {{ item.orderNumber }}
+                    </router-link>
+                    {% endblock %}
+
+                    {% block landimit_subscription_list_grid_label_manual_order %}
+                    <sw-label
+                        v-if="item.createdById"
+                        appearance="pill"
+                        size="small"
+                        class="landimit-subscription-list__manual-order-label"
+                    >
+                        {{ $tc('landimit-subscription.list.labelManualOrder') }}
+                    </sw-label>
+                    {% endblock %}
+                </template>
+                {% endblock %}
+
+                {% block landimit_subscription_list_grid_columns_customer_name %}
+                <template #column-customer.firstName="{ item }">
+                    <router-link :to="{ name: 'sw.customer.detail', params: { id: item.customer.id } }">
+                        {{ item.customer.lastName }}, {{ item.customer.firstName }}
+                    </router-link>
+                </template>
+                {% endblock %}
+
+                {% block landimit_subscription_list_grid_columns_billing_address %}
+                <template #column-billingAddressId="{ item }">
+                    {{ item.billingAddress.street }},
+                    {{ item.billingAddress.zipcode }}
+                    {{ item.billingAddress.city }}
+                </template>
+                {% endblock %}
+
+                {% block landimit_subscription_list_grid_columns_amount %}
+                <template #column-amountTotal="{ item }">
+                    {{ item.amountTotal | currency(item.currency.translated.shortName) }}
+                </template>
+                {% endblock %}
+
+                {% block landimit_subscription_list_grid_columns_state %}
+                <template #column-stateMachineState.name="{ item }">
+                    <sw-label
+                        v-if="!feature.isActive('FEATURE_NEXT_7530')"
+                        :variant="getVariantFromOrderState(item)"
+                        appearance="pill"
+                    >
+                        {{ item.stateMachineState.translated.name }}
+                    </sw-label>
+
+                    <div
+                        v-if="feature.isActive('FEATURE_NEXT_7530')"
+                        class="landimit-subscription-list__state"
+                    >
+                        <sw-color-badge
+                            :color="getVariantFromOrderState(item)"
+                            rounded
+                        />
+
+                        {{ item.stateMachineState.translated.name }}
+                    </div>
+                </template>
+                {% endblock %}
+
+                {% block landimit_subscription_list_grid_columns_transaction_state %}
+                <template #column-transactions.last().stateMachineState.name="{ item }">
+                    <sw-label
+                        v-if="!feature.isActive('FEATURE_NEXT_7530') && item.transactions && item.transactions[0]"
+                        :variant="getVariantFromPaymentState(item)"
+                        appearance="pill"
+                    >
+                        {{ item.transactions.last().stateMachineState.translated.name }}
+                    </sw-label>
+
+                    <div
+                        v-if="feature.isActive('FEATURE_NEXT_7530') && item.transactions && item.transactions[0]"
+                        class="landimit-subscription-list__state"
+                    >
+                        <sw-color-badge
+                            v-if="item.transactions && item.transactions[0]"
+                            :color="getVariantFromPaymentState(item)"
+                            rounded
+                        />
+
+                        {{ item.transactions.last().stateMachineState.translated.name }}
+                    </div>
+                </template>
+                {% endblock %}
+
+                {% block landimit_subscription_list_grid_columns_delivery_state %}
+                <template #column-deliveries[0].stateMachineState.name="{ item }">
+                    <sw-label
+                        v-if="!feature.isActive('FEATURE_NEXT_7530') && item.deliveries && item.deliveries[0]"
+                        :variant="getVariantFromDeliveryState(item)"
+                        appearance="pill"
+                    >
+                        {{ item.deliveries[0].stateMachineState.translated.name }}
+                    </sw-label>
+
+                    <div
+                        v-if="feature.isActive('FEATURE_NEXT_7530') && item.deliveries && item.deliveries[0]"
+                        class="landimit-subscription-list__state"
+                    >
+                        <sw-color-badge
+                            v-if="item.deliveries && item.deliveries[0]"
+                            :color="getVariantFromDeliveryState(item)"
+                            rounded
+                        />
+
+                        {{ item.deliveries[0].stateMachineState.translated.name }}
+                    </div>
+                </template>
+                {% endblock %}
+
+                {% block landimit_subscription_list_grid_columns_order_date %}
+                <template #column-createdAt="{ item }">
+                    <sw-time-ago :date="item.createdAt" />
+                </template>
+
+
+                <template #column-nextRenew="{ item }">
+
+                    {{ item.nextRenew| date({hour: '2-digit', minute: '2-digit'}) }}
+
+                </template>
+
+                <template #column-lineItems="{ item }">
+                    <ul>
+                        <li v-for="i in item.lineItems" :key="i.product.id">
+                            
+                            <sw-product-variant-info :variations="i.product.variation">
+                                {{ i.quantity }}x {{ i.label }}
+                            </sw-product-variant-info>
+
+                      </li>
+                    </ul>
+                </template>
+
+                <template #column-active="{ item }">
+                    <div v-if="item.active" class="sw-order-list__state">
+                        <sw-color-badge
+                            color="green"
+                            rounded
+                        />
+
+                        Yes
+                    </div>
+                    <div v-if="!item.active" class="sw-order-list__state">
+                        <sw-color-badge
+                            color="red"
+                            rounded
+                        />
+
+                        No
+                    </div>
+                </template>
+
+                {% endblock %}
+                {% endblock %}
+
+                {% block landimit_subscription_list_grid_columns_actions %}
+                <template #actions="{ item }">
+                    {% block landimit_subscription_list_grid_columns_actions_view %}
+                    <sw-context-menu-item
+                        class="landimit-subscription-list__order-view-action"
+                        :router-link="{ name: 'landimit.subscription.detail', params: { id: item.id } }"
+
+                    >
+                        {{ $tc('landimit-subscription.list.contextMenuView') }}
+                    </sw-context-menu-item>
+                    {% endblock %}
+                    
+                    <div v-if="item.active">
+                        {% block landimit_subscription_list_grid_columns_actions_deactivate %}
+                            <sw-context-menu-item
+                                variant="danger"
+                                :disabled="disableDeletion(item)"
+                                @click="onDeactivate(item.id)"
+                            >
+                                {{ $tc('landimit-subscription.list.contextMenuDeactivate') }}
+                            </sw-context-menu-item>
+                        {% endblock %}
+                    </div>
+                    <div v-if="!item.active">
+
+                        {% block landimit_subscription_list_grid_columns_actions_activate %}
+                            <sw-context-menu-item
+                                variant="danger"
+                                :disabled="disableDeletion(item)"
+                                @click="onActivate(item.id)"
+                            >
+                                {{ $tc('landimit-subscription.list.contextMenuActivate') }}
+                            </sw-context-menu-item>
+                        {% endblock %}
+                    </div>
+
+
+                    <div v-if="item.archived">
+                        {% block landimit_subscription_list_grid_columns_actions_unarchive %}
+                            <sw-context-menu-item
+                                variant="danger"
+                                :disabled="disableDeletion(item)"
+                                @click="onUnarchive(item.id)"
+                            >
+                                {{ $tc('landimit-subscription.list.contextMenuUnarchive') }}
+                            </sw-context-menu-item>
+                        {% endblock %}
+                    </div>
+                    <div v-if="!item.archived">
+
+                        {% block landimit_subscription_list_grid_columns_actions_archived %}
+                            <sw-context-menu-item
+                                variant="danger"
+                                :disabled="disableDeletion(item)"
+                                @click="onArchive(item.id)"
+                            >
+                                {{ $tc('landimit-subscription.list.contextMenuArchive') }}
+                            </sw-context-menu-item>
+                        {% endblock %}
+                    </div>
+                </template>
+                {% endblock %}
+
+                {% block landimit_subscription_list_grid_action_modals %}
+                <template #action-modals="{ item }">
+                    {% block landimit_subscription_list_delete_modal %}
+                    <sw-modal
+                        v-if="showDeleteModal === item.id"
+                        :title="$tc('global.default.warning')"
+                        variant="small"
+                        @modal-close="onCloseDeleteModal"
+                    >
+                        {% block landimit_subscription_list_delete_modal_confirm_delete_text %}
+                        <p class="landimit-subscription-list__confirm-delete-text">
+                            {{ $tc('landimit-subscription.list.textDeleteConfirm', 0, { orderNumber: `${item.orderNumber}` }) }}
+                        </p>
+                        {% endblock %}
+
+                        {% block landimit_subscription_list_delete_modal_footer %}
+                        <template #modal-footer>
+                            {% block landimit_subscription_list_delete_modal_cancel %}
+                            <sw-button
+                                size="small"
+                                @click="onCloseDeleteModal"
+                            >
+                                {{ $tc('landimit-subscription.list.buttonCancel') }}
+                            </sw-button>
+                            {% endblock %}
+
+                            {% block landimit_subscription_list_delete_modal_confirm %}
+                            <sw-button
+                                variant="danger"
+                                size="small"
+                                @click="onConfirmDelete(item.id)"
+                            >
+                                {{ $tc('landimit-subscription.list.buttonDelete') }}
+                            </sw-button>
+                            {% endblock %}
+                        </template>
+                        {% endblock %}
+                    </sw-modal>
+                    {% endblock %}
+                </template>
+                {% endblock %}
+
+                <template #pagination>
+                    {% block landimit_subscription_list_grid_pagination %}
+                    <sw-pagination
+                        :page="page"
+                        :limit="limit"
+                        :total="total"
+                        :total-visible="7"
+                        @page-change="onPageChange"
+                    />
+                    {% endblock %}
+                </template>
+
+                {% block landimit_subscription_list_bulk_selected_actions_content %}
+                <template #bulk>
+                    {% block landimit_subscription_list_bulk_selected_actions_content_bulk_edit %}
+                    <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
+                    <a
+                        v-if="acl.can('order.editor')"
+                        class="link link-primary"
+                        @click="showBulkEditModal = true"
+                    >
+                        {{ $tc('global.sw-bulk-edit-modal.bulkEdit') }}
+                    </a>
+                    {% endblock %}
+                </template>
+                {% endblock %}
+
+                {% block landimit_subscription_list_bulk_edit_modal %}
+                <template #bulk-modals="{ selection }">
+                    <sw-bulk-edit-modal
+                        v-if="showBulkEditModal"
+                        ref="bulkEditModal"
+                        class="landimit-subscription-bulk-edit-modal"
+                        :selection="selection"
+                        :bulk-grid-edit-columns="orderColumns"
+                        @edit-items="onBulkEditItems"
+                        @modal-close="showBulkEditModal = false"
+                    >
+                        {% block landimit_subscription_list_bulk_edit_grid_columns_order_number %}
+                        <template #column-orderNumber="{ item }">
+                            {% block landimit_subscription_list_bulk_edit_grid_order_number_link %}
+                            <router-link
+                                :to="{ name: 'sw.order.detail', params: { id: item.id } }"
+                                target="_blank"
+                                rel="noreferrer noopener"
+                            >
+                                {{ item.orderNumber }}
+                            </router-link>
+                            {% endblock %}
+
+                            {% block landimit_subscription_list_bulk_edit_grid_label_manual_order %}
+                            <sw-label
+                                v-if="item.createdById"
+                                appearance="pill"
+                                size="small"
+                                class="landimit-subscription-bulk_edit__manual-order-label"
+                            >
+                                {{ $tc('landimit-subscription.list.labelManualOrder') }}
+                            </sw-label>
+                            {% endblock %}
+                        </template>
+                        {% endblock %}
+
+                        {% block landimit_subscription_list_bulk_edit_grid_columns_customer_name %}
+                        <template #column-orderCustomer.firstName="{ item }">
+                            <router-link
+                                :to="{ name: 'sw.customer.detail', params: { id: item.orderCustomer.customerId } }"
+                                target="_blank"
+                                rel="noreferrer noopener"
+                            >
+                                {{ item.orderCustomer.lastName }}, {{ item.orderCustomer.firstName }}
+                            </router-link>
+                        </template>
+                        {% endblock %}
+
+                        {% block landimit_subscription_list_bulk_edit_grid_columns_billing_address %}
+                        <template #column-billingAddressId="{ item }">
+                            {{ item.billingAddress.street }},
+                            {{ item.billingAddress.zipcode }}
+                            {{ item.billingAddress.city }}
+                        </template>
+                        {% endblock %}
+
+                        {% block landimit_subscription_list_bulk_edit_grid_columns_amount %}
+                        <template #column-amountTotal="{ item }">
+                            {{ item.amountTotal | currency(item.currency.translated.shortName) }}
+                        </template>
+                        {% endblock %}
+
+                        {% block landimit_subscription_list_bulk_edit_grid_columns_state %}
+                        <template #column-stateMachineState.name="{ item }">
+                            <sw-label
+                                :variant="getVariantFromOrderState(item)"
+                                appearance="pill"
+                            >
+                                {{ item.stateMachineState.translated.name }}
+                            </sw-label>
+                        </template>
+                        {% endblock %}
+
+                        {% block landimit_subscription_list_bulk_edit_grid_columns_transaction_state %}
+                        <template #column-transactions.last().stateMachineState.name="{ item }">
+                            <sw-label
+                                v-if="item.transactions && item.transactions[0]"
+                                :variant="getVariantFromPaymentState(item)"
+                                appearance="pill"
+                            >
+                                {{ item.transactions.last().stateMachineState.translated.name }}
+                            </sw-label>
+                        </template>
+                        {% endblock %}
+
+                        {% block landimit_subscription_list_bulk_edit_grid_columns_delivery_state %}
+                        <template #column-deliveries[0].stateMachineState.name="{ item }">
+                            <sw-label
+                                v-if="item.deliveries && item.deliveries[0]"
+                                :variant="getVariantFromDeliveryState(item)"
+                                appearance="pill"
+                            >
+                                {{ item.deliveries[0].stateMachineState.translated.name }}
+                            </sw-label>
+                        </template>
+                        {% endblock %}
+
+                        {% block landimit_subscription_list_bulk_edit_grid_columns_order_date %}
+                        <template #column-createdAt="{ item }">
+                            {{ item.createdAt | date({hour: '2-digit', minute: '2-digit'}) }}
+                        </template>
+                        {% endblock %}
+                    </sw-bulk-edit-modal>
+                </template>
+                {% endblock %}
+            </sw-data-grid>
+            {% endblock %}
+
+            {% block landimit_subscription_list_empty_state %}
+            <template v-if="!isLoading && !total">
+                <sw-empty-state
+                    v-if="filterCriteria.length || isValidTerm(term)"
+                    :title="$tc('sw-empty-state-.messageNoResultSubscriptionsTitle')"
+                >
+                    <template #icon>
+                        <img
+                            :src="'/administration/static/img/empty-states/order-empty-state.svg' | asset"
+                            :alt="$tc('sw-empty-state.messageNoResultTitle')"
+                        >
+                    </template>
+
+                    <template #default>
+                        {{ $tc('sw-empty-state.messageNoResultSublineSubscriptionBefore') }}
+                        <router-link
+                            class="sw-empty-state__description-link"
+                            :to="{ name: 'sw.profile.index.searchPreferences' }"
+                        >
+                            {{ $tc('sw-empty-state.messageNoResultSublineSubscriptionLink') }}
+                        </router-link>
+                        {{ $tc('sw-empty-state.messageNoResultSublineSubscriptionAfter') }}
+                    </template>
+                </sw-empty-state>
+                <sw-empty-state
+                    v-else
+                    :title="$tc('landimit-subscription.list.messageEmpty')"
+                >
+                    <template #icon>
+                        <img
+                            :src="'/administration/static/img/empty-states/order-empty-state.svg' | asset"
+                            :alt="$tc('landimit-subscription.list.messageEmpty')"
+                        >
+                    </template>
+                </sw-empty-state>
+            </template>
+            {% endblock %}
+        </div>
+        {% endblock %}
+    </template>
+
+    {% block landimit_subscription_list_sidebar %}
+    <template #sidebar>
+        <sw-sidebar class="landimit-subscription-list__sidebar">
+            {% block landimit_subscription_list_sidebar_refresh %}
+            <sw-sidebar-item
+                icon="default-arrow-360-left"
+                :title="$tc('landimit-subscription.list.titleSidebarItemRefresh')"
+                @click="onRefresh"
+            />
+            {% endblock %}
+
+            {% block landimit_subscription_list_sidebar_filter %}
+            <sw-sidebar-filter-panel
+                entity="archived"
+                :store-key="storeKey"
+                :filters="listFilters"
+                :defaults="defaultFilters"
+                :active-filter-number="activeFilterNumber"
+                @criteria-changed="updateCriteria"
+            />
+            {% endblock %}
+        </sw-sidebar>
+    </template>
+    {% endblock %}
+    {% endblock %}
+</sw-page>
+{% endblock %}

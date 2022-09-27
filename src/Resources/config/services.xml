@@ -1,0 +1,157 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="LandimIT\Subscription\Core\Content\Subscription\SubscriptionDefinition">
+            <tag name="shopware.entity.definition" entity="landimit_subscription" />
+        </service>
+        
+        <service id="LandimIT\Subscription\Core\Content\SubscriptionLineItem\SubscriptionLineItemDefinition">
+            <tag name="shopware.entity.definition" entity="landimit_subscription_line_item" />
+        </service>
+
+        <service id="LandimIT\Subscription\Core\Content\SubscriptionOrder\SubscriptionOrderDefinition">
+            <tag name="shopware.entity.definition" entity="landimit_subscription_order" />
+        </service>
+
+
+         <service id="LandimIT\Subscription\Command\SubscriptionListCommand">
+            <argument type="service" id="landimit_subscription.repository"/>
+            <argument type="service" id="Shopware\Core\Checkout\Order\SalesChannel\OrderService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="sales_channel_type.repository"/>
+            <argument type="service" id="customer.repository"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="state_machine_state.repository"/>
+            <argument type="service" id="order_transaction.repository"/>
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\CachedSalesChannelContextFactory"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\CartCalculator"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\CartPersister"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Processor"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\LineItemFactoryRegistry" />
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Stripe\ShopwarePayment\StripeApi\StripeApiFactory"/>
+            <argument type="service" id="landimit_subscription_order.repository"/>
+            <argument type="service" id="Shopware\Core\System\StateMachine\StateMachineRegistry"/>
+            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
+            <argument type="service" id="mail_template.repository"/>
+            <argument type="service" id="Shopware\Core\Content\Mail\Service\MailService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="LandimIT\Subscription\Command\SubscriptionCreateCommand">
+            <argument type="service" id="landimit_subscription.repository"/>
+            <argument type="service" id="customer.repository"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="sales_channel_type.repository"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="LandimIT\Subscription\Service\SubscriptionService">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+       
+        <service id="LandimIT\Subscription\Storefront\Controller\CartLineItemController"
+                 decorates="Shopware\Storefront\Controller\CartLineItemController" public="true">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="Shopware\Core\Checkout\Promotion\Cart\PromotionItemBuilder"/>
+            <argument type="service" id="Shopware\Core\Content\Product\Cart\ProductLineItemFactory"/>
+            <argument type="service" id="Shopware\Core\Framework\Util\HtmlSanitizer"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\SalesChannel\SalesChannelContextSwitcher"/>
+            <argument type="service" id="payment_method.repository"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\SalesChannel\ContextSwitchRoute"/>
+            
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <call method="setTwig">
+                <argument type="service" id="twig"/>
+            </call>
+        </service>
+
+        <service id="LandimIT\Subscription\Storefront\Controller\CheckoutController" decorates="Shopware\Storefront\Controller\CheckoutController" public="true">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="Shopware\Storefront\Page\Checkout\Cart\CheckoutCartPageLoader"/>
+            <argument type="service" id="Shopware\Storefront\Page\Checkout\Confirm\CheckoutConfirmPageLoader"/>
+            <argument type="service" id="Shopware\Storefront\Page\Checkout\Finish\CheckoutFinishPageLoader"/>
+            <argument type="service" id="Shopware\Core\Checkout\Order\SalesChannel\OrderService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Payment\PaymentService"/>
+            <argument type="service" id="Shopware\Storefront\Page\Checkout\Offcanvas\OffcanvasCartPageLoader"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\LogoutRoute"/>
+            <argument type="service" id="landimit_subscription.repository"/>
+            <argument type="service" id="landimit_subscription_line_item.repository"/>
+            <argument type="service" id="landimit_subscription_order.repository"/>
+            <argument type="service" id="session" />
+            <argument type="service" id="order_transaction.repository"/>
+            <argument type="service" id="mail_template.repository"/>
+            <argument type="service" id="Shopware\Core\Content\Mail\Service\MailService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <call method="setTwig">
+                <argument type="service" id="twig"/>
+            </call>
+        </service>
+
+
+
+        <service id="LandimIT\Subscription\Storefront\Page\Account\SubscriptionPageLoader" public="true">
+            <argument type="service" id="Shopware\Storefront\Page\GenericPageLoader" />
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="landimit_subscription.repository"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Shopware\Core\Content\Mail\Service\MailService"/>
+            <argument type="service" id="mail_template.repository"/>
+        </service>
+
+        <service id="LandimIT\Subscription\Storefront\Controller\SubscriptionController" public="true">
+            <argument type="service" id="LandimIT\Subscription\Storefront\Page\Account\SubscriptionPageLoader" />
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="LandimIT\Subscription\Core\Checkout\Cart\SubscriptionCartProcessor">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Price\PercentagePriceCalculator"/>
+            <argument type="service" id="Symfony\Contracts\Translation\TranslatorInterface"/>
+            <argument type="service" id="language.repository"/>
+            <tag name="shopware.cart.processor" priority="4500"/>
+        </service>
+
+        <service id="LandimIT\Subscription\Service\ScheduledTask\SubscriptionTask">
+            <tag name="shopware.scheduled.task" />
+        </service>
+
+
+        <service id="LandimIT\Subscription\Service\ScheduledTask\SubscriptionTaskHandler">
+            <argument type="service" id="scheduled_task.repository" />
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="sales_channel_domain.repository"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\CachedSalesChannelContextFactory" />
+            <argument type="service" id="category.repository"/>
+            <argument type="service" id="service_container" />
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="landimit_subscription.repository"/>
+            <argument type="service" id="Shopware\Core\Checkout\Order\SalesChannel\OrderService"/>
+            <tag name="messenger.message_handler" />
+        </service>
+
+        <service id="LandimIT\Subscription\Core\Rule\SubscriptionRule" >
+            <argument type="service" id="session" />
+            <argument type="service" id="Psr\Log\LoggerInterface"/>
+            <tag name="shopware.rule.definition"/>
+        </service>
+
+    </services>
+</container>

@@ -1,0 +1,15 @@
+{% sw_extends '@Storefront/storefront/page/account/sidebar.html.twig' %}
+
+{% block page_account_sidebar_menu_inner %}
+    {{ parent() }}
+                           
+    {% block page_account_sidebar_link_subscriptions %}
+        <a href="{{ path('frontend.account.subscription.page') }}"
+           title="{{ "account.subscriptionLink"|trans|striptags }}"
+           class="list-group-item list-group-item-action account-aside-item{% if activeRoute is same as('frontend.account.subscription.page') %} is-active{% endif %}">
+            {{ "account.subscriptionLink"|trans|sw_sanitize }}
+        </a>
+    {% endblock %}
+{% endblock %}
+
+

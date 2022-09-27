@@ -1,0 +1,22 @@
+{% sw_extends '@Storefront/storefront/page/checkout/address/register.html.twig' %}
+
+
+
+{% block page_checkout_register_personal_guest %}
+
+ 	{% set subscription = false %}
+
+    {% for lineItem in page.cart.lineItems %}
+
+        {% if lineItem.extensions.subscription.interval %}
+            {% set subscription = true %}
+        {% endif %}
+
+    {% endfor %}
+
+    {% if not subscription %}
+        {{ parent() }}
+    {% endif %}
+
+
+{% endblock %}

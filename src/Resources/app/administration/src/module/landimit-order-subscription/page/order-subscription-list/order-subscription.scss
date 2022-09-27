@@ -1,0 +1,10 @@
+@import "~scss/variables";
+
+.landimit-document-list__sidebar {
+    .sw-sidebar-item__scrollable-container {
+        padding: 0 25px;
+    }
+}
+.sw-data-grid.is--compact .sw-data-grid__body .sw-data-grid__cell-content {
+    height: auto;
+}

@@ -1,0 +1,14 @@
+{% sw_extends '@Storefront/storefront/page/checkout/checkout-item.html.twig' %}
+
+{% block page_checkout_item_info_variant_characteristics %}
+    <div class="cart-item-details-subscriptions">
+
+        {% if lineItem.extensions.subscription %}
+            <span class="badge badge-secondary">{{ ("product.subscriptionsOption" ~ lineItem.extensions.subscription.name)|trans|sw_sanitize }}</span>
+
+        {% endif %}
+        
+    </div>
+    {{ parent() }}
+
+{% endblock %}

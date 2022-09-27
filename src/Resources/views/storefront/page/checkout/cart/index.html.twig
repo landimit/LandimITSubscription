@@ -1,0 +1,40 @@
+{% sw_extends '@Storefront/storefront/page/checkout/cart/index.html.twig' %}
+
+
+{% block page_checkout_cart_add_promotion_input_group %}
+
+
+    {% set subscription = false %}
+
+    {% for lineItem in page.cart.lineItems %}
+
+        {% if lineItem.extensions.subscription.interval %}
+            {% set subscription = true %}
+        {% endif %}
+
+    {% endfor %}
+
+    {% if not subscription %}
+        {{ parent() }}
+    {% endif %}
+
+{% endblock %}
+            
+
+{% block page_checkout_cart_shipping_costs_trigger %}
+
+    {% set subscription = false %}
+
+    {% for lineItem in page.cart.lineItems %}
+
+        {% if lineItem.extensions.subscription.interval %}
+            {% set subscription = true %}
+        {% endif %}
+
+    {% endfor %}
+
+    {% if not subscription %}
+        {{ parent() }}
+    {% endif %}
+    
+{% endblock %}

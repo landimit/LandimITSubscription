@@ -1,0 +1,373 @@
+{% sw_extends '@Storefront/storefront/page/account/_page.html.twig' %}
+
+
+{% block page_account_main_content %}
+    {% block page_account_subscriptions %}
+        <div class="account-subscriptions">
+            {% block page_account_subscriptions_welcome %}
+                <div class="account-welcome">
+                    {% block page_account_subscriptions_welcome_headline %}
+                        <h1>{{ "account.subscriptionsTitle"|trans|sw_sanitize }}</h1>
+                        <p>{{ "account.subscriptionsWelcome"|trans|sw_sanitize }}</p>
+                    {% endblock %}
+                </div>
+            {% endblock %}
+
+            {% block page_account_subscriptions_main %}
+                <div class="account-subscriptions-main">
+                    {% if subscriptions.total == 0 %}
+                        {% block page_account_subscriptions_info_empty %}
+                            {% sw_include '@Storefront/storefront/utilities/alert.html.twig' with {
+                                type: "warning",
+                                content: "account.subscriptionsInfoEmpty"|trans|sw_sanitize
+                            } %}
+                        {% endblock %}
+                    {% else %}
+
+                        {% for subscription in subscriptions %}
+
+
+                        <div class="table order-table" data-order-detail-loader="true">
+                           <div class="order-wrapper">
+                              <div class="order-item-header">
+                                 <div class="row flex-wrap">
+                                    <h3 class="col-auto order-table-header-heading">{{ ("product.subscriptionsOption" ~ subscription.intervalName)|trans|sw_sanitize }}</h3>
+
+
+                                    <div class="col-12 col-sm">
+                                       <div class="order-table-header-order-status">
+                                          <span class="badge badge-lg order-item-status-badge order-item-status-badge-{% if subscription.active %}open{% else %}cancelled{% endif %}">
+
+                                          {% if subscription.active %}
+                                            {{ "account.SubscriptionOpenBadge"|trans|sw_sanitize }}
+                                          {% else %}
+                                            {{ "account.SubscriptionCancelledBadge"|trans|sw_sanitize }}
+                                          {% endif %}
+
+                                          </span>
+                                       </div>
+                                    </div>
+                                    <div class="col-1 order-table-header-context-menu-wrapper">
+                                        <button class="btn dropdown-toggle order-table-header-context-menu"
+                                                type="button"
+                                                id="accountOrderDropdown"
+                                                data-toggle="dropdown"
+                                                aria-haspopup="true"
+                                                aria-expanded="false">
+                                            {% sw_icon 'more-horizontal' %}
+                                        </button>
+
+                                     
+                                       <div class="dropdown-menu dropdown-menu-right order-table-header-context-menu-content" aria-labelledby="accountOrderDropdown">
+                                            {% if subscription.active %}
+                                                {% if  subscription.paymentMethod.handlerIdentifier == "stripe.shopware_payment.payment_handler.card" %}
+
+                                                    <a class="order-table-header-context-menu-content-link" href="{{ path('frontend.account.subscription.update_credit_card', {'subscriptionId': subscription.id}) }}">{{ "account.subscriptionUpdateCreditCard"|trans|sw_sanitize }}</a>
+
+                                                {% endif %}
+
+                                                <a class="order-table-header-context-menu-content-link" href="#" data-toggle="modal" data-target="#modalCancel">{{ "account.subscriptionCancel"|trans|sw_sanitize }}</a>
+
+                                            {% else %}
+                                                <a class="order-table-header-context-menu-content-link" href="#" data-toggle="modal" data-target="#modalActivate">{{ "account.subscriptionActivate"|trans|sw_sanitize }}</a>
+                                            {% endif %}
+
+                                       </div>
+
+                                       <div class="tester">
+                                          <div class="modal fade" id="modalCancel" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+                                             <div class="modal-dialog subscription-history-cancel-modal" role="dialog">
+                                                <div class="modal-content">
+                                                   <div class="modal-header">
+                                                        <h5 class="modal-title">{{ "account.editCancelSubscriptionModalHeader"|trans|sw_sanitize }}</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                          <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                   </div>
+                                                   <div class="modal-body">
+                                                    {% block page_checkout_aside_cancel_order_modal_body_text %}
+                                                        <p>{{ "account.editCancelSubscriptioModalBodyText"|trans|sw_sanitize }}</p>
+                                                    {% endblock %}
+
+                                                    {% block page_checkout_aside_cancel_order_modal_body_question %}
+                                                        <p>{{ "account.editCancelSubscriptionModalBodyQuestion"|trans|sw_sanitize }}</p>
+                                                    {% endblock %}
+                                                   </div>
+                                                   <div class="modal-footer">
+                                                    <form action="{{ path('frontend.account.subscription.cancel') }}"
+                                                          method="post">
+
+                                                        {% block page_checkout_aside_cancel_order_modal_footer_form_csrf %}
+                                                            {{ sw_csrf('frontend.account.subscription.cancel') }}
+                                                        {% endblock %}
+
+                                                        {% block page_checkout_aside_cancel_order_modal_footer_form_order_id %}
+                                                            <input type="hidden"
+                                                                   name="subscriptionId"
+                                                                   value="{{ subscription.id }}">
+                                                        {% endblock %}
+
+                                                        {% block page_checkout_aside_cancel_order_modal_footer_form_redirect %}
+                                                            <input type="hidden"
+                                                                   name="redirectTo"
+                                                                   value="frontend.account.subscription.page">
+                                                        {% endblock %}
+
+                                                        {% block page_checkout_aside_cancel_order_modal_header_back_button %}
+                                                            <button class="btn"
+                                                                    type="button"
+                                                                    data-dismiss="modal">
+                                                                {{ "account.editOrderCancelSubscriptionModalFooterButtonBack"|trans|sw_sanitize }}
+                                                            </button>
+                                                        {% endblock %}
+
+                                                        {% block page_checkout_aside_cancel_order_modal_footer_form_button %}
+                                                            <button type="submit"
+                                                                    class="btn btn-primary">
+                                                                {{ "account.editOrderCancelSubscriptionModalFooterButton"|trans|sw_sanitize }}
+                                                            </button>
+                                                        {% endblock %}
+                                                    </form>
+
+                                                   </div>
+                                                </div>
+                                             </div>
+                                          </div>
+
+                                          <div class="modal fade" id="modalActivate" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+                                             <div class="modal-dialog subscription-history-activate-modal" role="dialog">
+                                                <div class="modal-content">
+                                                   <div class="modal-header">
+                                                        <h5 class="modal-title">{{ "account.editActivateSubscriptionModalHeader"|trans|sw_sanitize }}</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                          <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                   </div>
+                                                   <div class="modal-body">
+                                                    {% block page_checkout_aside_activate_order_modal_body_text %}
+                                                        <p>{{ "account.editActivateSubscriptioModalBodyText"|trans|sw_sanitize }}</p>
+                                                    {% endblock %}
+
+                                                   
+                                                   </div>
+                                                   <div class="modal-footer">
+                                                    <form action="{{ path('frontend.account.subscription.activate') }}"
+                                                          method="post">
+
+                                                        {% block page_checkout_aside_activate_order_modal_footer_form_csrf %}
+                                                            {{ sw_csrf('frontend.account.subscription.activate') }}
+                                                        {% endblock %}
+
+                                                        {% block page_checkout_aside_activate_order_modal_footer_form_order_id %}
+                                                            <input type="hidden"
+                                                                   name="subscriptionId"
+                                                                   value="{{ subscription.id }}">
+                                                        {% endblock %}
+
+                                                        {% block page_checkout_aside_activate_order_modal_footer_form_redirect %}
+                                                            <input type="hidden"
+                                                                   name="redirectTo"
+                                                                   value="frontend.account.subscription.page">
+                                                        {% endblock %}
+
+                                                        {% block page_checkout_aside_activate_order_modal_header_back_button %}
+                                                            <button class="btn"
+                                                                    type="button"
+                                                                    data-dismiss="modal">
+                                                                {{ "account.editOrderActivateOrderModalFooterButtonBack"|trans|sw_sanitize }}
+                                                            </button>
+                                                        {% endblock %}
+
+                                                        {% block page_checkout_aside_activate_order_modal_footer_form_button %}
+                                                            <button type="submit"
+                                                                    class="btn btn-primary">
+                                                                {{ "account.editOrderActivateOrderModalFooterButton"|trans|sw_sanitize }}
+                                                            </button>
+                                                        {% endblock %}
+                                                    </form>
+
+                                                   </div>
+                                                </div>
+                                             </div>
+                                          </div>
+
+
+
+
+                                       </div>
+                                    </div>
+                                    {% if subscription.active %}
+                                    <div class="col-12 order-table-header-order-number">
+                                       <strong class="order-table-header-label">{{ "account.NextRenewLabel"|trans|sw_sanitize }}:</strong>
+                                       <span class="order-table-body-value">{{ subscription.nextRenew|date('d/m/Y')}}</span>
+                                    </div>
+                                    
+                                    {% endif %}
+                                    {% if subscription.active and 0 %}
+
+                                    <button class="btn btn-light btn-block order-hide-btn collapsed" type="submit" data-toggle="collapse" data-target="#order{{ subscription.id }}" aria-expanded="false" aria-controls="collapseExample">
+                                        <span class="order-hide-btn-text"> {{ "account.SubscriptionHideMoreDetails"|trans|sw_sanitize }} {% sw_icon 'arrow-head-up' %}</span>
+                                        <span class="order-view-btn-text"> {{ "account.SubscriptionHideMoreInformation"|trans|sw_sanitize }} {% sw_icon 'arrow-head-down' style { 'size': 'xs' } %}</span>
+                                   </button>
+                                   {% endif %}
+
+                                </div>
+                              
+                              </div>
+                           </div>
+
+                            {% if subscription.active %}
+                            <div class="order-item-detail">
+                              <div class="collapse_disabled" id="order{{ subscription.id }}">
+                                 <div class="order-detail-content">
+                                    <div class="order-detail-content-body">
+                                    </div>
+                                    <div class="order-detail-content-header">
+                                       <div class="row">
+                                          <div class="col-6 order-detail-content-header-cell order-header-name">
+                                            {{ "account.Product"|trans|sw_sanitize }}
+                                          </div>
+                                          <div class="col-2 order-detail-content-header-cell order-header-quantity">
+                                             {{ "account.Quantity"|trans|sw_sanitize }}
+                                          </div>
+                                          <div class="col-2 order-detail-content-header-cell order-header-price">
+                                             {{ "account.UnitPrice"|trans|sw_sanitize }}
+                                          </div>
+                                          <div class="col-2 order-detail-content-header-cell order-header-total">
+                                             {{ "account.Subtotal"|trans|sw_sanitize }}
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="order-detail-content-body">
+                                       <div class="order-detail-content-body order-detail-content-list">
+
+                                        {% for lineItem in subscription.lineItems %}
+
+                                            <div class="order-item-detail-list-item order-detail-item-product ">
+                                                 <div class="row order-detail-content-row">
+                                                    <div class="col-12 col-md-2 order-item order-item-image">
+                                                       <div class="order-item-product-image">
+                                                          <a href="{{ path('frontend.detail.page', {'productId': lineItem.product.id}) }}" class="product-image-link" title="{{ lineItem.product.name }}">
+                                                          <img src="{{ lineItem.product.cover.media.url }}" sizes="100px" class="img-fluid order-item-img" title="{{ lineItem.product.translated.name }}">
+                                                          </a>
+                                                       </div>
+                                                    </div>
+                                                    <div class="col-12 col-md-4 order-item order-item-name">
+                                                       <a href="{{ path('frontend.detail.page', {'productId': lineItem.product.id}) }}" class="order-item-product-name" title="{{ lineItem.product.name }}"> <strong class="name-value">
+                                                       {{ lineItem.product.translated.name }}
+                                                       </strong> </a>
+                                                    </div>
+                                                    <div class="col-12 col-md-2 order-item order-item-quantity">
+                                                       <strong class="order-item-label order-item-quantity-label">
+                                                        {{ "account.Quantity"|trans|sw_sanitize }}:
+:
+                                                       </strong>
+                                                       <span class="order-item-value order-item-quantity-value">
+                                                       {{ lineItem.quantity }}
+                                                       </span>
+                                                    </div>
+                                                    <div class="col-12 col-md-2 order-item order-item-price">
+                                                       <strong class="order-item-label order-item-price-label">
+                                                       {{ "account.UnitPrice"|trans|sw_sanitize }}:
+                                                       </strong>
+                                                       <span class="order-item-value order-item-price-value">
+
+                                                       {{ lineItem.unitPrice|currency(subscription.currency.isoCode)}}
+                                                       </span>
+                                                    </div>
+                                                    <div class="col-12 col-md-2 order-item order-item-total">
+                                                       <strong class="order-item-label order-item-total-label">
+                                                       {{ "account.Subtotal"|trans|sw_sanitize }}:
+                                                       </strong>
+                                                       <span class="order-item-value order-item-total-value">
+                                                       {{ lineItem.totalPrice|currency(subscription.currency.isoCode)}}
+                                                       </span>
+                                                    </div>
+                                                 </div>
+                                                 <div class="order-item-detail-list-item-divider"></div>
+                                            </div>
+                                        {% endfor %}
+                                          
+
+                                          <div class="order-item-detail-list-item order-detail-item-subscription_discount is-discount ">
+                                             <div class="row order-detail-content-row">
+                                                <div class="col-12 col-md-2 order-item order-item-image">
+                                                   
+                                                </div>
+                                                <div class="col-12 col-md-4 order-item order-item-name">
+                                                   <strong class="name-value">
+                                                    {{ "account.discount"|trans|sw_sanitize }}
+                                                   </strong>
+                                                </div>
+                                                <div class="col-12 col-md-2 order-item order-item-quantity">
+                                                  
+                                                </div>
+                                                <div class="col-12 col-md-2 order-item order-item-price">
+                                                </div>
+                                                <div class="col-12 col-md-2 order-item order-item-total">
+                                                   <strong class="order-item-label order-item-total-label">
+                                                   Subtotal:
+                                                   </strong>
+                                                   <span class="order-item-value order-item-total-value">
+                                                   {{ subscription.discount|currency(subscription.currency.isoCode)}}
+                                                   </span>
+                                                </div>
+                                             </div>
+                                             <div class="order-item-detail-list-item-divider"></div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="order-detail-content-footer">
+                                       <div class="order-item-detail-footer">
+                                          <div class="row no-gutters">
+                                             <div class="col-12 col-md-7 col-xl-6">
+                                                <dl class="row no-gutters order-item-detail-labels">
+                                                   <dt class="col-6 col-md-5">Date:</dt>
+                                                   <dd class="col-6 col-md-7 order-item-detail-labels-value">{{ subscription.createAt|date('d/m/Y') }}</dd>
+                                                    {% if  subscription.paymentMethod.handlerIdentifier == "stripe.shopware_payment.payment_handler.card" %}
+                                                    <dt class="col-6 col-md-5">{{ "account.CardLabel"|trans|sw_sanitize }}:</dt>
+                                                    <dd class="col-6 col-md-7 order-item-detail-labels-value">
+                                                        <i class="fab fa-cc-{{ subscription.customFields.stripe_payment_context.payment.brand }}"></i> 
+
+                                                        {{ subscription.customFields.stripe_payment_context.payment.last4 }} <b>Exp:</b>{{ subscription.customFields.stripe_payment_context.payment.exp_month }}/{{ subscription.customFields.stripe_payment_context.payment.exp_year  }}
+
+                                                   </dd>
+                                                   {% endif %}
+                                                   {% if  subscription.paymentMethod.shortName == "invoice_payment" %}
+                                                        <dt class="col-6 col-md-5">{{ "account.PaymentMethod"|trans|sw_sanitize }}:</dt>
+                                                        <dd class="col-6 col-md-7 order-item-detail-labels-value">
+                                                        {{ "account.PaymentMethodInvoice"|trans|sw_sanitize }}
+                                                        </dd>
+                                                   {% endif %}
+
+
+                                                </dl>
+                                             </div>
+                                             <div class="col-12 col-md-5 col-xl-6">
+                                                <dl class="row no-gutters order-item-detail-summary">
+                                                   <dt class="col-6 col-md-8">
+                                                      {{ "account.total"|trans|sw_sanitize }}
+                                                   </dt>
+                                                   <dd class="col-6 col-md-4">
+                                                      {{ (subscription.totalPrice-subscription.discount)|currency(subscription.currency.isoCode)}}
+                                                   </dd>
+                                                </dl>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           {% endif %}
+                        </div>
+
+                        {% endfor %}
+                    {% endif %}
+
+
+                </div>
+            {% endblock %}
+        </div>
+    {% endblock %}
+{% endblock %}

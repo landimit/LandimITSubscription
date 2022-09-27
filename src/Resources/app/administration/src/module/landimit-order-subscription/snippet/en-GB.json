@@ -1,0 +1,46 @@
+{
+    "landimit-subscription": {
+        "list": {
+            "messageEmpty": "Empty",
+            "contextMenuView": "View",
+            "contextMenuDeactivate": "Deactivate for renew",
+            "contextMenuActivate": "Activate for renew",
+            "contextMenuArchive": "Archive",
+            "contextMenuUnarchive": "Unarchive"
+        },
+        "NavItem": "Subscriptions",
+        "detail": {
+            "textHeadline": "Subscription Detail",
+            "cardTitlesubscriptionInfo": "Detail",
+            "labelCreatedAt": "Created At",
+            "labelCustomer": "Customer",
+            "labelNextRenew": "Next renew",
+            "labelEmail": "Email",
+            "cardTitlesubscriptionProducts": "Products"
+        },
+        "filters": {
+            "archived": {
+                "label": "Archived",
+                "placeholder": "true or false"
+            }
+        }
+    },
+    "landimit-order-subscription": {
+            "pluginDescriptionText": "No Subscription found."
+    },
+    "landimit": {
+        "textSubscriptions": "Subscriptions",
+        "subscription": {
+            "columnId": "Id",
+            "ColumnActive": "Active",
+            "columnProducts": "Products",
+            "columnCustomerName": "Customer",
+            "columnNextRenew": "Next renew",
+            "columnCreatedAt": "Created At",
+            "columnProductName": "Product",
+            "columnUnitPrice": "Unit price",
+            "columnTotalPrice": "Total price"
+
+        } 
+    }
+}

@@ -1,0 +1,263 @@
+{% block landimit_subscription_detail %}
+<sw-page class="landimit-subscription-detail">
+
+    {% block landimit_subscription_detail_header %}
+    <template slot="smart-bar-header">
+        <h2>{{ placeholder(subscription, 'title', $tc('landimit-subscription.detail.textHeadline')) }}</h2>
+    </template>
+    {% endblock %}
+
+  
+
+    {% block landimit_subscription_detail_content %}
+    <template slot="content">
+        <sw-card-view>
+
+            {% block landimit_subscription_detail_basic_info_card %} 
+            <sw-card
+                v-if="subscription"
+                position-identifier="landimit-subscription-detail-basic-info"
+                :title="$tc('landimit-subscription.detail.cardTitlesubscriptionInfo')"
+                :is-loading="isLoading"
+            >
+
+                {% block sw_customer_card_rows %}
+                <template slot="grid">
+                    <sw-container rows="auto auto">
+
+                        {% block sw_customer_card_row_primary %}
+                        <sw-card-section divider="bottom">
+
+                            {% block sw_customer_card_metadata_container %}
+                            <sw-container>
+
+                                {% block sw_customer_card_metadata %}
+                                <div class="landimit-subscription-detail__metadata">
+
+                                    {% block sw_customer_card_metadata_customer_name %}
+                                    {% block sw_custsomer_card_metadata_customer_name_label %}
+                                    <div class="landimit-subscription-detail__metadata-subscription-headline">
+                                        <sw-container
+                                            columns="auto 150px"
+                                            gap="0px 15px"
+                                        >
+                                            <div class="landimit-subscription-detail__metadata-subscription-title">
+                                                    {{ subscription.autoIncrement }}
+                                            </div>
+                                            <div
+                                                v-if="stars"
+                                                class="landimit-subscription-detail__metadata-subscription-stars"
+                                            >
+                                                <sw-rating-stars
+                                                    v-model="subscription.points"
+                                                    class="star-count-display"
+                                                />
+                                                <div class="star-count-description">
+                                                    {{ $tc(`landimit-subscription.detail.subscription${Math.round(stars)}PointRatingText`) }}
+                                                </div>
+                                            </div>
+                                        </sw-container>
+                                    </div>
+                                    <p class="landimit-subscription-detail__metadata-subscription-content">
+                                        {{ subscription.content }}
+                                    </p>
+                                    {% endblock %}
+                                    {% endblock %}
+                                </div>
+                                {% endblock %}
+                            </sw-container>
+                            {% endblock %}
+                        </sw-card-section>
+                        {% endblock %}
+
+                        {% block sw_customer_card_row_secondary %}
+                        <sw-card-section
+                            secondary
+                            slim
+                        >
+                            <slot name="default">
+
+                                <sw-container
+                                    class="landimit-subscription-base-info"
+                                    columns="repeat(auto-fit, minmax(250px, 1fr))"
+                                    gap="0px 15px"
+                                >
+                                    <sw-loader v-if="isLoading" />
+                                    <div
+                                        v-if="!isLoading"
+                                        class="landimit-subscription-base-info-columns"
+                                    >
+
+                                        {% block sw_customer_base_metadata_created_at %}
+                                        <sw-description-list>
+
+                                            {% block sw_customer_base_metadata_created_at_label %}
+                                            <dt class="landimit-subscription-base-info__label">
+                                                {{ $tc('landimit-subscription.detail.labelCreatedAt') }}
+                                            </dt>
+                                            {% endblock %}
+
+                                            {% block sw_customer_base_metadata_created_at_content %}
+                                            <dd>
+                                                {{ subscription.createdAt | date({hour: '2-digit', minute: '2-digit', second: '2-digit'}) }}
+                                            </dd>
+                                            {% endblock %}
+                                        </sw-description-list>
+                                        {% endblock %}
+
+                                        {% block sw_customer_base_metadata_sales_channel %}
+                                        <sw-description-list>
+
+                                            {% block sw_customer_base_metadata_sales_next_renew %}
+                                            <dt class="landimit-subscription-base-info__label">
+                                                {{ $tc('landimit-subscription.detail.labelNextRenew') }}
+                                            </dt>
+                                            {% endblock %}
+
+                                            {% block sw_customer_base_metadata_sales_channel_content %}
+                                            <dd>
+                                                {{ subscription.nextRenew|date('d/m/Y') }}
+                                            </dd>
+                                            {% endblock %}
+                                        </sw-description-list>
+                                        {% endblock %}
+
+                                        
+                                    </div>
+                                    <div
+                                        v-if="!isLoading"
+                                        class="landimit-subscription-base-info-columns"
+                                    >
+
+                                        {% block sw_customer_base_metadata_customer %}
+                                        <sw-description-list>
+
+                                            {% block sw_customer_base_metadata_customer_label %}
+                                            <dt class="landimit-subscription-base-info__label">
+                                                {{ $tc('landimit-subscription.detail.labelCustomer') }}
+                                            </dt>
+                                            {% endblock %}
+
+                                            {% block sw_customer_base_metadata_customer_content %}
+                                            <dd v-if="subscription.customer">
+                                                {{ salutation(subscription.customer) }}
+                                            </dd>
+                                            <dd v-else>
+                                                {{ subscription.externalUser }}
+                                            </dd>
+                                            {% endblock %}
+                                        </sw-description-list>
+                                        {% endblock %}
+
+                                        {% block sw_customer_base_metadata_email %}
+                                        <sw-description-list>
+                                            {% block sw_customer_base_metadata_email_label %}
+                                            <dt class="landimit-subscription-base-info__label">
+                                                {{ $tc('landimit-subscription.detail.labelEmail') }}
+                                            </dt>
+                                            {% endblock %}
+
+                                            {% block sw_customer_base_metadata_email_content %}
+                                            <dd v-if="subscription.customer">
+                                                {{ subscription.customer.email }}
+                                            </dd>
+                                            <dd v-else>
+                                                {{ subscription.externalEmail }}
+                                            </dd>
+                                            {% endblock %}
+                                        </sw-description-list>
+                                        {% endblock %}
+                                    </div>
+                                </sw-container>
+                            </slot>
+                        </sw-card-section>
+                        {% endblock %}
+
+
+
+
+
+                    </sw-container>
+
+
+                </template>
+                {% endblock %}
+
+
+
+
+
+            </sw-card>
+            {% endblock %}
+
+            {% block landimit_subscription_line_items_grid_grid %}
+            <sw-card
+                v-if="subscription"
+                position-identifier="landimit-subscription-detail-basic-info"
+                :title="$tc('landimit-subscription.detail.cardTitlesubscriptionProducts')"
+                :is-loading="isLoading"
+            >
+                <sw-data-grid
+                    class="landimit-subscription-line-items-grid__data-grid"
+                    identifier="landimit-subscription-line-item-grid"
+                    :data-source="subscription.lineItems"
+                    :columns="getOrderColumns"
+                    :show-selection="false"
+                    :show-actions="false"
+                    :is-loading="isLoading">
+
+                    {% block landimit_subscription_line_items_grid_grid_columns %}
+                   
+
+                        {% block landimit_subscription_line_items_grid_grid_columns_unit_price %}
+                        <template #column-unitPrice="{ item }">
+
+
+                            {{ item.unitPrice|currency(subscription.currency.isoCode) }}
+
+                        </template>
+                        {% endblock %}
+
+                        {% block landimit_subscription_line_items_grid_grid_columns_total_price %}
+                        <template #column-totalPrice="{ item }">
+
+                            {% block landimit_subscription_line_items_grid_grid_columns_total_price_content %}
+                            <span>
+                                {{ item.totalPrice|currency(subscription.currency.isoCode) }}
+                            </span>
+                            {% endblock %}
+
+                        </template>
+                        {% endblock %}
+
+                        {% block landimit_subscription_line_items_grid_grid_columns_quantity %}
+                        <template #column-name="{ item }">
+
+                            {% block landimit_subscription_line_items_grid_grid_columns_quantity_inline_edit %}
+
+                                {{ item.quantity }}x {{ item.label }}
+                            {% endblock %}
+
+                        </template>
+                        {% endblock %}
+
+
+                    
+                    {% endblock %}
+
+                </sw-data-grid>
+            </sw-card>
+
+        {% endblock %}
+
+        </sw-card-view>
+
+
+    {% endblock %}
+
+    </template>
+
+</sw-page>
+
+
+{% endblock %}

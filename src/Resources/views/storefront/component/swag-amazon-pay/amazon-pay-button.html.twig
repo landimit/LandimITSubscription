@@ -1,0 +1,19 @@
+{% sw_extends '@SwagAmazonPay/storefront/component/swag-amazon-pay/amazon-pay-button.html.twig' %}
+
+{% block storefront_component_swag_amazon_pay_amazon_pay_button %}
+    {% set subscription = false %}
+
+    {% for lineItem in page.cart.lineItems %}
+
+        {% if lineItem.extensions.subscription.interval %}
+            {% set subscription = true %}
+        {% endif %}
+
+    {% endfor %}
+
+
+    {% if not subscription %}
+        {{ parent() }}
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,20 @@
+{% sw_extends '@Storefront/storefront/component/ecs-spb-checkout/ecs-button.html.twig' %}
+
+
+{% block swag_paypal_ecs_button %}
+
+    {% set subscription = false %}
+
+    {% for lineItem in page.cart.lineItems %}
+
+        {% if lineItem.extensions.subscription.interval %}
+            {% set subscription = true %}
+        {% endif %}
+
+    {% endfor %}
+
+    {% if not subscription %}
+        {{ parent() }}
+    {% endif %}
+
+{% endblock %}

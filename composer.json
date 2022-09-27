@@ -1,0 +1,41 @@
+{
+    "name": "landimit/subscription",
+    "description": "LandimIT Subscription",
+    "version": "v1.0.4",
+    "type": "shopware-platform-plugin",
+    "license": "proprietary",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Landim IT"
+        }
+    ],
+    "require": {
+        "stripe/stripe-php": "^7.50.0"
+    },
+    "extra": {
+        "shopware-plugin-class": "LandimIT\\Subscription\\LandimITSubscription",
+        "label": {
+            "de-DE": "LandimIT Subscription Plugin",
+            "en-GB": "LandimIT Subscription Plugin"
+        },
+        "description": {
+            "de-DE": "LandimIT Subscription",
+            "en-GB": "LandimIT Subscription"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "LandimIT\\Subscription\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LandimIT\\Subscription\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

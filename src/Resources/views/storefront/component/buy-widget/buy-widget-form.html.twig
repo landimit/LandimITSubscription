@@ -1,0 +1,65 @@
+ {% sw_extends '@Storefront/storefront/component/buy-widget/buy-widget-form.html.twig' %}
+
+ {% block buy_widget_buy_container %}
+
+
+        <div class="subscription-form-main p-3 bg-light mb-2" data-subscription-form="true">
+            <h5 class="mb-0">{{ "product.subscriptionsProductTitle"|trans|sw_sanitize }}</h5>
+
+            <div class="row">
+                  <div class="col-12">     
+                         <div class="form-check">
+                                  <input class="form-check-input subscription-form-option-no" type="radio" name="lineItems[{{ product.id }}][subscription_option]" id="exampleRadios0" value="0">
+                                  <label class="form-check-label" for="exampleRadios0">
+                                        {{ "product.subscriptionsOneTimePurchase"|trans|sw_sanitize }}
+                                  </label>
+                         </div>
+                         <div class="form-check">
+                                  <input class="form-check-input subscription-form-option-yes" type="radio" name="lineItems[{{ product.id }}][subscription_option]" id="exampleRadios9" value="1" checked>
+                                  <label class="form-check-label" for="exampleRadios9">
+                                        {{ "product.subscriptionsOption"|trans|sw_sanitize }} <span class="badge badge-danger pl-2 pr-2">-15%</span>
+                                  </label>
+                         </div>
+                        
+                  </div>
+            </div>
+            <div class="row mt-2 subscription-options">
+                  <div class="col-12">     
+                          <h5 class="mb-0">{{ "product.subscriptionsIntervalTitle"|trans|sw_sanitize }}</h5>
+                          <div class="form-row">
+                                <div class="form-group col-md-6">
+                                       <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="lineItems[{{ product.id }}][subscription_interval]" id="exampleRadios1" value="1209600">
+                                                <label class="form-check-label" for="exampleRadios1">
+                                                  {{ "product.subscriptionsOption2weeks"|trans|sw_sanitize }}
+                                                </label>
+                                       </div>
+                                       <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="lineItems[{{ product.id }}][subscription_interval]" id="exampleRadios2" value="2419200" checked>
+                                                <label class="form-check-label" for="exampleRadios2">
+                                                  {{ "product.subscriptionsOption4weeks"|trans|sw_sanitize }}
+                                                </label>
+                                       </div>
+                                </div>
+                                <div class="form-group col-md-6">
+                                       <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="lineItems[{{ product.id }}][subscription_interval]" id="exampleRadios3" value="3628800">
+                                                <label class="form-check-label" for="exampleRadios3">
+                                                  {{ "product.subscriptionsOption6weeks"|trans|sw_sanitize }}
+                                                </label>
+                                       </div>
+                                       <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="lineItems[{{ product.id }}][subscription_interval]" id="exampleRadios4" value="4838400">
+                                                <label class="form-check-label" for="exampleRadios4">
+                                                  {{ "product.subscriptionsOption8weeks"|trans|sw_sanitize }}
+                                                </label>
+                                       </div>
+                                </div>
+                         </div>
+
+                  </div>         
+            </div>
+        </div>
+ 		{{ parent() }}
+           
+{% endblock %}
